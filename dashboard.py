@@ -197,7 +197,7 @@ async def user_workspaces(user_email: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.get("/users/{email}/credits", response_model=dict, operation_id="get_user_credits")
+@app.get("/users/{user_email}/credits", response_model=dict, operation_id="get_user_credits")
 async def user_credits(user_email: str):
     """Get the credits associated with a user's email ID"""
     try:
@@ -220,7 +220,7 @@ async def user_credits(user_email: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
     
 
-@app.post("/users/{email}/credits", response_model=dict, operation_id="update_user_credits")
+@app.post("/users/{user_email}/credits", response_model=dict, operation_id="update_user_credits")
 async def update_user_credits(user_email: str, credit_update: CreditUpdate):
     """Update the credits associated with a user's email ID"""
     try:
