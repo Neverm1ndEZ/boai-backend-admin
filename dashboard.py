@@ -88,6 +88,7 @@ async def admin_login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(data={"sub": admin['email']})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @app.post("/admin/create")
 async def create_new_admin(
     admin_data: AdminCreate,
@@ -98,9 +99,6 @@ async def create_new_admin(
         return {"message": "Admin created successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
-
 
 
 @app.get("/users", response_model=List[User], operation_id="list_users")
@@ -198,6 +196,7 @@ async def user_workspaces(user_email: str):
         logger.error(f"Error fetching workspace content for user {user_email}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
 @app.get("/users/{email}/credits", response_model=dict, operation_id="get_user_credits")
 async def user_credits(user_email: str):
     """Get the credits associated with a user's email ID"""
@@ -219,6 +218,32 @@ async def user_credits(user_email: str):
     except Exception as e:
         logger.error(f"Error retrieving credits for user {user_email}: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+    
+
+@app.post("/users/{email}/credits", response_model=dict, operation_id="update_user_credits")
+async def update_user_credits(user_email: str, credit_update: CreditUpdate):
+    """Update the credits associated with a user's email ID"""
+    try:
+        user = db.users.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        credits = user.get("credits")
+        if credits is None:
+            raise HTTPException(status_code=404, detail="Credits not found for this user")
+        
+        updated_credits = credits + credit_update.credits
+        db.users.update_one({"email": user_email}, {"$set": {"credits": updated_credits}})
+        
+        logger.info(f"Updated credits for user {user_email}: {updated_credits}")
+        return {
+            "user_email": user_email,
+            "credits": updated_credits
+        }
+    except Exception as e:
+        logger.error(f"Error updating credits for user {user_email}: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 @app.get("/analytics/video-trend", operation_id="get_video_trend")
 async def video_trend(user_email: str, days: int = Query(30, description="Number of days to analyze")):
