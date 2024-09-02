@@ -13,8 +13,7 @@ from fastapi.security import APIKeyHeader, OAuth2PasswordRequestForm
 from auth import create_access_token, get_current_admin, super_admin_required
 from db_operations import create_admin, verify_admin, get_db
 
-app = FastAPI(root_path="api")
-
+app = FastAPI(root_path="api", docs_url="/api/docs"m openapi_url="/api/openapi.json")
 
 
 # Set up logging
